@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TaskServiceImpl.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projectmangement</a> &gt; <a href="index.source.html" class="el_package">com.cognizant.projectmangement.service.impl</a> &gt; <span class="el_source">TaskServiceImpl.java</span></div><h1>TaskServiceImpl.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package com.cognizant.projectmangement.service.impl;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import com.cognizant.projectmangement.exception.TaskCreationException;
+import com.cognizant.projectmangement.exception.TaskNotFoundException;
+import com.cognizant.projectmangement.exception.UserNotFoundException;
+import com.cognizant.projectmangement.jpa.model.Task;
+import com.cognizant.projectmangement.jpa.model.User;
+import com.cognizant.projectmangement.jpa.repository.TaskRepository;
+import com.cognizant.projectmangement.jpa.repository.UserRepository;
+import com.cognizant.projectmangement.model.TaskDetails;
+import com.cognizant.projectmangement.model.UserDetails;
+import com.cognizant.projectmangement.request.converter.TaskDetailsToTaskConverter;
+import com.cognizant.projectmangement.response.converter.TaskToTaskDetailsConverter;
+import com.cognizant.projectmangement.response.converter.UserToUserDetailsConverter;
+import com.cognizant.projectmangement.service.TaskService;
+
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Task Service Implementation for tasks module
+ * 
+ * @author CTS
+ *
+ */
+@Component
+@Service
+<span class="fc" id="L40">@Slf4j</span>
+<span class="fc" id="L41">public class TaskServiceImpl implements TaskService {</span>
+
+	@Autowired
+	TaskRepository taskRepository;
+
+	@Autowired
+	TaskDetailsToTaskConverter taskRequestConverter;
+
+	@Autowired
+	TaskToTaskDetailsConverter taskResponseConverter;
+
+	@Autowired
+	UserToUserDetailsConverter userToUserDetailsConverter;
+
+	@Autowired
+	UserRepository userRepository;
+
+	@Override
+	public TaskDetails createTask(TaskDetails taskDetailsRequest) throws UserNotFoundException, TaskCreationException {
+		// validate Task Details to Create
+<span class="fc" id="L61">		validateTaskDetails(taskDetailsRequest);</span>
+		// Step 1: Create Task
+<span class="fc" id="L63">		Task taskDataResponse = taskRepository.save(taskRequestConverter.convert(taskDetailsRequest));</span>
+<span class="fc" id="L64">		TaskDetails taskDetailsResponse = taskResponseConverter.convert(taskDataResponse);</span>
+		// Step 2: Map newly created taskId to user based on userId
+<span class="fc" id="L66">		UserDetails userDetailsUpdated = updateUserTaskIdReference(taskDetailsRequest, taskDataResponse);</span>
+<span class="fc" id="L67">		taskDetailsResponse.setUserDetails(userDetailsUpdated);</span>
+<span class="fc" id="L68">		return taskDetailsResponse;</span>
+	}
+
+	/**
+	 * Updates taskId reference to userData
+	 * 
+	 * @param taskDetailsRequest
+	 * @param taskDataResponse
+	 * @return
+	 * @throws UserNotFoundException
+	 */
+	private UserDetails updateUserTaskIdReference(TaskDetails taskDetailsRequest, Task taskDataResponse)
+			throws UserNotFoundException {
+<span class="fc bfc" id="L81" title="All 2 branches covered.">		if (null != taskDetailsRequest.getUserDetails()) {</span>
+<span class="fc" id="L82">			int userId = taskDetailsRequest.getUserDetails().getUserId();</span>
+<span class="fc" id="L83">			Optional&lt;User&gt; userDataOpt = userRepository.findById(userId);</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">			if (!userDataOpt.isPresent()) {</span>
+<span class="fc" id="L85">				log.error(&quot;User with userId &quot; + userId + &quot; not found&quot;);</span>
+<span class="fc" id="L86">				throw new UserNotFoundException(userId);</span>
+			}
+<span class="fc" id="L88">			User userData = userDataOpt.get();</span>
+<span class="fc" id="L89">			userData.setTask(taskDataResponse);</span>
+<span class="fc" id="L90">			userRepository.save(userData);</span>
+<span class="fc" id="L91">			return userToUserDetailsConverter.convert(userData);</span>
+		}
+<span class="fc" id="L93">		return null;</span>
+	}
+
+	/**
+	 * Validates Task creation or update details
+	 * 
+	 * @param taskDetailsRequest
+	 * @throws TaskCreationException
+	 */
+	private void validateTaskDetails(TaskDetails taskDetailsRequest) throws TaskCreationException {
+<span class="fc bfc" id="L103" title="All 2 branches covered.">		if (StringUtils.isBlank(taskDetailsRequest.getTaskDescription())) {</span>
+<span class="fc" id="L104">			log.error(&quot;Task Creation validation failed  taskDescription is blank&quot;);</span>
+<span class="fc" id="L105">			throw new TaskCreationException(&quot;taskDescription&quot;);</span>
+		}
+
+<span class="fc bfc" id="L108" title="All 2 branches covered.">		if (StringUtils.isBlank(taskDetailsRequest.getTaskStatus())) {</span>
+<span class="fc" id="L109">			taskDetailsRequest.setTaskStatus(&quot;ACTIVE&quot;);</span>
+		}
+
+<span class="fc bfc" id="L112" title="All 2 branches covered.">		if (null != taskDetailsRequest.getStartDate()) {</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">			if (null == taskDetailsRequest.getEndDate()) {</span>
+<span class="fc" id="L114">				log.error(&quot;Task Creation validation failed  endDate is null&quot;);</span>
+<span class="fc" id="L115">				throw new TaskCreationException(&quot;endDate&quot;);</span>
+			}
+			// Make sure endDate is always greater than startDate by 1 day
+<span class="fc bfc" id="L118" title="All 2 branches covered.">			else if (!validateTaskDates(taskDetailsRequest.getStartDate(), taskDetailsRequest.getEndDate())) {</span>
+<span class="fc" id="L119">				log.error(&quot;Task Creation validation failed  endDate is not after startDate&quot;);</span>
+<span class="fc" id="L120">				throw new TaskCreationException(&quot;endDate&quot;);</span>
+			}
+		}
+		// if startDate and endDate are null, default startDate will be today and
+		// endDate is tomorrow
+<span class="pc bpc" id="L125" title="1 of 4 branches missed.">		else if ((null == taskDetailsRequest.getStartDate()) &amp;&amp; (null == taskDetailsRequest.getEndDate())) {</span>
+<span class="fc" id="L126">			taskDetailsRequest.setStartDate(LocalDate.now());</span>
+<span class="fc" id="L127">			taskDetailsRequest.setEndDate(LocalDate.now().plusDays(1));</span>
+		}
+<span class="fc" id="L129">	}</span>
+
+	/**
+	 * Validates endDate and startDate , returns true only if endDate is after
+	 * startDate
+	 * 
+	 * @param startDate
+	 * @param endDate
+	 * @return true if endDate is greater than startDate else false
+	 */
+	private boolean validateTaskDates(LocalDate startDate, LocalDate endDate) {
+<span class="fc" id="L140">		return endDate.isAfter(startDate);</span>
+	}
+
+	@Override
+	public TaskDetails updateTask(TaskDetails taskDetailsRequest)
+			throws TaskCreationException, UserNotFoundException, TaskNotFoundException {
+<span class="fc" id="L146">		findTaskDetailsById(taskDetailsRequest.getTaskId());</span>
+		// validate Task Details to Update
+<span class="fc" id="L148">		validateTaskDetails(taskDetailsRequest);</span>
+		// Step 1: Create Task
+<span class="fc" id="L150">		Task taskDataResponse = taskRepository.save(taskRequestConverter.convert(taskDetailsRequest));</span>
+<span class="fc" id="L151">		TaskDetails taskDetailsResponse = taskResponseConverter.convert(taskDataResponse);</span>
+		// Step 2: Map newly created taskId to user based on userId
+<span class="fc" id="L153">		UserDetails userDetailsUpdated = updateUserTaskIdReference(taskDetailsRequest, taskDataResponse);</span>
+<span class="fc" id="L154">		taskDetailsResponse.setUserDetails(userDetailsUpdated);</span>
+<span class="fc" id="L155">		return taskDetailsResponse;</span>
+	}
+
+	@Override
+	public TaskDetails findTaskDetailsById(int taskId) throws TaskNotFoundException {
+<span class="fc" id="L160">		Optional&lt;Task&gt; taskData = taskRepository.findById(taskId);</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">		if (!taskData.isPresent()) {</span>
+<span class="fc" id="L162">			log.error(&quot;Task with taskId &quot; + taskId + &quot; not found&quot;);</span>
+<span class="fc" id="L163">			throw new TaskNotFoundException(taskId);</span>
+		}
+<span class="fc" id="L165">		return taskResponseConverter.convert(taskData.get());</span>
+	}
+
+	@Override
+	public List&lt;TaskDetails&gt; findAllTaskDetails() {
+<span class="fc" id="L170">		List&lt;TaskDetails&gt; taskDetailsList = new ArrayList&lt;TaskDetails&gt;();</span>
+<span class="fc" id="L171">		Iterable&lt;Task&gt; taskDataList = taskRepository.findAll();</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">		for (Task taskData : taskDataList) {</span>
+<span class="fc" id="L173">			taskDetailsList.add(taskResponseConverter.convert(taskData));</span>
+<span class="fc" id="L174">		}</span>
+<span class="fc" id="L175">		return taskDetailsList;</span>
+	}
+
+	@Override
+	public void deleteTask(TaskDetails taskDetails) throws TaskNotFoundException {
+		// find task via taskId
+<span class="fc" id="L181">		findTaskDetailsById(taskDetails.getTaskId());</span>
+		// nullify taskId references for taskId in users table
+<span class="fc" id="L183">		deleteUserTaskIdReferences(taskDetails.getTaskId());</span>
+		// deletes Task if matching taskId found in DB
+<span class="fc" id="L185">		taskRepository.delete(taskRequestConverter.convert(taskDetails));</span>
+<span class="fc" id="L186">	}</span>
+
+	/**
+	 * Deletes taskId reference from userData
+	 * 
+	 * @param taskId
+	 */
+	private void deleteUserTaskIdReferences(int taskId) {
+<span class="fc bfc" id="L194" title="All 2 branches covered.">		for (User userData : userRepository.findAll()) {</span>
+<span class="fc bfc" id="L195" title="All 4 branches covered.">			if ((null != userData.getTask()) &amp;&amp; (userData.getTask().getTaskId() == taskId)) {</span>
+<span class="fc" id="L196">				userData.setTask(null);</span>
+<span class="fc" id="L197">				userRepository.save(userData);</span>
+			}
+<span class="fc" id="L199">		}</span>
+<span class="fc" id="L200">	}</span>
+
+	@Override
+	public void deleteTaskByTaskId(int taskId) throws TaskNotFoundException {
+		// find task via taskId
+<span class="fc" id="L205">		findTaskDetailsById(taskId);</span>
+		// nullify taskId references for taskId in users table
+<span class="fc" id="L207">		deleteUserTaskIdReferences(taskId);</span>
+		// deletes Task if matching taskId found in DB
+<span class="fc" id="L209">		taskRepository.deleteById(taskId);</span>
+<span class="fc" id="L210">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

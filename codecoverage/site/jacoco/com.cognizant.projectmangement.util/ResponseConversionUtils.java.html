@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ResponseConversionUtils.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projectmangement</a> &gt; <a href="index.source.html" class="el_package">com.cognizant.projectmangement.util</a> &gt; <span class="el_source">ResponseConversionUtils.java</span></div><h1>ResponseConversionUtils.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package com.cognizant.projectmangement.util;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.cognizant.projectmangement.jpa.model.ParentTask;
+import com.cognizant.projectmangement.jpa.model.Project;
+import com.cognizant.projectmangement.jpa.model.Task;
+import com.cognizant.projectmangement.jpa.model.User;
+import com.cognizant.projectmangement.jpa.repository.TaskRepository;
+import com.cognizant.projectmangement.jpa.repository.UserRepository;
+import com.cognizant.projectmangement.model.ParentTaskDetails;
+import com.cognizant.projectmangement.model.ProjectDetails;
+import com.cognizant.projectmangement.model.TaskDetails;
+import com.cognizant.projectmangement.model.UserDetails;
+
+/**
+ * MySQLDB to API Response Conversion Utils
+ * 
+ * @author CTS
+ *
+ */
+@Component
+<span class="fc" id="L30">public class ResponseConversionUtils {</span>
+
+	@Autowired
+	UserRepository userRepository;
+
+	@Autowired
+	TaskRepository taskRepository;
+
+	/**
+	 * 
+	 * @param projectData
+	 * @return
+	 */
+	public ProjectDetails populateProjectDetailsFromProjectData(Project projectData, boolean userDetailsCheck,
+			boolean taskListCheck) {
+<span class="fc" id="L45">		ProjectDetails projectDetails = new ProjectDetails();</span>
+<span class="fc" id="L46">		projectDetails.setProjectId(projectData.getProjectId());</span>
+<span class="fc" id="L47">		projectDetails.setProjectDescription(projectData.getProject());</span>
+<span class="fc" id="L48">		projectDetails.setPriority(projectData.getPriority());</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">		if (null != projectData.getStartDate()) {</span>
+<span class="fc" id="L50">			projectDetails.setStartDate(projectData.getStartDate());</span>
+		}
+<span class="fc bfc" id="L52" title="All 2 branches covered.">		if (null != projectData.getEndDate()) {</span>
+<span class="fc" id="L53">			projectDetails.setEndDate(projectData.getEndDate());</span>
+		}
+<span class="fc bfc" id="L55" title="All 2 branches covered.">		if (userDetailsCheck) {</span>
+<span class="fc" id="L56">			projectDetails.setUserDetails(populateUserDetailsFromProjectData(projectData.getProjectId()));</span>
+		}
+<span class="fc bfc" id="L58" title="All 2 branches covered.">		if (taskListCheck) {</span>
+<span class="fc" id="L59">			projectDetails.setTaskList(populateTaskListAssociatedToProject(projectData.getProjectId()));</span>
+		}
+<span class="fc" id="L61">		return projectDetails;</span>
+	}
+
+	/**
+	 * Returns taskDetailsList associated to given projectData
+	 * 
+	 * @param projectId
+	 * @return taskDetailsList
+	 */
+	public List&lt;TaskDetails&gt; populateTaskListAssociatedToProject(int projectId) {
+<span class="fc" id="L71">		List&lt;TaskDetails&gt; taskDetailsList = new ArrayList&lt;TaskDetails&gt;();</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">		for (Task taskData : taskRepository.findAll()) {</span>
+<span class="fc bfc" id="L73" title="All 4 branches covered.">			if ((null != taskData.getProject()) &amp;&amp; (taskData.getProject().getProjectId() == projectId)) {</span>
+<span class="fc" id="L74">				taskDetailsList.add(populateTaskDetailsFromTaskData(taskData, false, false, false));</span>
+			}
+<span class="fc" id="L76">		}</span>
+
+<span class="fc" id="L78">		return taskDetailsList;</span>
+	}
+
+	/**
+	 * Populate matching userDetails from projectId
+	 * 
+	 * @param projectId
+	 * @return
+	 */
+	public UserDetails populateUserDetailsFromProjectData(int projectId) {
+<span class="fc bfc" id="L88" title="All 2 branches covered.">		for (User userData : userRepository.findAll()) {</span>
+<span class="fc bfc" id="L89" title="All 4 branches covered.">			if ((null != userData.getProject()) &amp;&amp; (userData.getProject().getProjectId() == projectId)) {</span>
+<span class="fc" id="L90">				return populateUserDetailsFromUserData(userData, false, false);</span>
+			}
+<span class="fc" id="L92">		}</span>
+<span class="fc" id="L93">		return null;</span>
+	}
+
+	/**
+	 * Populates userDetails from userData
+	 * 
+	 * @param userData
+	 * @param projectDetailsCheck
+	 * @param taskDetailsCheck
+	 * @return userDetails
+	 */
+	public UserDetails populateUserDetailsFromUserData(User userData, boolean projectDetailsCheck,
+			boolean taskDetailsCheck) {
+<span class="fc" id="L106">		UserDetails userDetails = new UserDetails();</span>
+<span class="fc" id="L107">		userDetails.setUserId(userData.getUserId());</span>
+<span class="fc" id="L108">		userDetails.setEmployeeId(userData.getEmployeeId());</span>
+<span class="fc" id="L109">		userDetails.setFirstName(userData.getFirstName());</span>
+<span class="fc" id="L110">		userDetails.setLastName(userData.getLastName());</span>
+<span class="fc bfc" id="L111" title="All 4 branches covered.">		if ((null != userData.getProject()) &amp;&amp; projectDetailsCheck) {</span>
+<span class="fc" id="L112">			userDetails.setProjectDetails(populateProjectDetailsFromProjectData(userData.getProject(), false, false));</span>
+		}
+<span class="fc bfc" id="L114" title="All 4 branches covered.">		if ((null != userData.getTask()) &amp;&amp; taskDetailsCheck) {</span>
+<span class="fc" id="L115">			userDetails.setTaskDetails(populateTaskDetailsFromTaskData(userData.getTask(), false, false, false));</span>
+		}
+<span class="fc" id="L117">		return userDetails;</span>
+	}
+
+	/**
+	 * Populates taskDetails from taskData
+	 * 
+	 * @param task
+	 * @param projectDetailsCheck
+	 * @param userDetailsCheck
+	 * @param parentTaskDetailsCheck
+	 * @return taskDetails
+	 */
+	public TaskDetails populateTaskDetailsFromTaskData(Task task, boolean projectDetailsCheck, boolean userDetailsCheck,
+			boolean parentTaskDetailsCheck) {
+<span class="fc" id="L131">		TaskDetails taskDetails = new TaskDetails();</span>
+<span class="fc" id="L132">		taskDetails.setTaskId(task.getTaskId());</span>
+<span class="fc" id="L133">		taskDetails.setTaskDescription(task.getTaskDescription());</span>
+<span class="fc" id="L134">		taskDetails.setTaskStatus(task.getStatus());</span>
+<span class="fc" id="L135">		taskDetails.setPriority(task.getPriority());</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">		if (null != task.getStartDate()) {</span>
+<span class="fc" id="L137">			taskDetails.setStartDate(task.getStartDate());</span>
+		}
+<span class="fc bfc" id="L139" title="All 2 branches covered.">		if (null != task.getEndDate()) {</span>
+<span class="fc" id="L140">			taskDetails.setEndDate(task.getEndDate());</span>
+		}
+<span class="fc bfc" id="L142" title="All 4 branches covered.">		if ((null != task.getProject()) &amp;&amp; projectDetailsCheck) {</span>
+<span class="fc" id="L143">			taskDetails.setProjectDetails(populateProjectDetailsFromProjectData(task.getProject(), false, false));</span>
+		}
+<span class="fc bfc" id="L145" title="All 2 branches covered.">		if (userDetailsCheck) {</span>
+<span class="fc" id="L146">			taskDetails.setUserDetails(populateUserDetailsFromTaskData(task.getTaskId()));</span>
+		}
+<span class="fc bfc" id="L148" title="All 4 branches covered.">		if ((null != task.getParentTask()) &amp;&amp; parentTaskDetailsCheck) {</span>
+<span class="fc" id="L149">			taskDetails.setParentTaskDetails(populateParentTaskDetailsFromParentTaskData(task.getParentTask(), false));</span>
+		}
+<span class="fc" id="L151">		return taskDetails;</span>
+	}
+
+	/**
+	 * Returns parentTask from parentTask
+	 * 
+	 * @param parentTask
+	 * @param projectDetailsCheck
+	 * @return parentTaskDetails
+	 */
+	public ParentTaskDetails populateParentTaskDetailsFromParentTaskData(ParentTask parentTaskData,
+			boolean projectDetailsCheck) {
+<span class="fc" id="L163">		ParentTaskDetails parentTaskDetails = new ParentTaskDetails();</span>
+<span class="fc" id="L164">		parentTaskDetails.setParentId(parentTaskData.getParentId());</span>
+<span class="fc" id="L165">		parentTaskDetails.setParentTaskDescription(parentTaskData.getParentTask());</span>
+<span class="fc bfc" id="L166" title="All 4 branches covered.">		if ((null != parentTaskData.getProject()) &amp;&amp; projectDetailsCheck) {</span>
+<span class="fc" id="L167">			parentTaskDetails.setProjectDetails(</span>
+<span class="fc" id="L168">					populateProjectDetailsFromProjectData(parentTaskData.getProject(), false, false));</span>
+		}
+<span class="fc" id="L170">		return parentTaskDetails;</span>
+	}
+
+	/**
+	 * Returns userDetails from taskId
+	 * 
+	 * @param taskId
+	 * @return userDetails
+	 */
+	public UserDetails populateUserDetailsFromTaskData(int taskId) {
+<span class="fc bfc" id="L180" title="All 2 branches covered.">		for (User userData : userRepository.findAll()) {</span>
+<span class="fc bfc" id="L181" title="All 4 branches covered.">			if ((null != userData.getTask()) &amp;&amp; (userData.getTask().getTaskId() == taskId)) {</span>
+<span class="fc" id="L182">				return populateUserDetailsFromUserData(userData, false, false);</span>
+			}
+<span class="fc" id="L184">		}</span>
+<span class="fc" id="L185">		return null;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

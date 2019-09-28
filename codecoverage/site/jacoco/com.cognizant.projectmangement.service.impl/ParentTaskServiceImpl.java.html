@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ParentTaskServiceImpl.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projectmangement</a> &gt; <a href="index.source.html" class="el_package">com.cognizant.projectmangement.service.impl</a> &gt; <span class="el_source">ParentTaskServiceImpl.java</span></div><h1>ParentTaskServiceImpl.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package com.cognizant.projectmangement.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import com.cognizant.projectmangement.exception.ParentTaskCreationException;
+import com.cognizant.projectmangement.exception.ParentTaskNotFoundException;
+import com.cognizant.projectmangement.jpa.model.ParentTask;
+import com.cognizant.projectmangement.jpa.model.Task;
+import com.cognizant.projectmangement.jpa.repository.ParentTaskRepository;
+import com.cognizant.projectmangement.jpa.repository.TaskRepository;
+import com.cognizant.projectmangement.model.ParentTaskDetails;
+import com.cognizant.projectmangement.request.converter.ParentTaskDetailsToParentTaskConverter;
+import com.cognizant.projectmangement.response.converter.ParentTaskToParentTaskDetailsConverter;
+import com.cognizant.projectmangement.service.ParentTaskService;
+
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Parent Task Service Implementation
+ * 
+ * @author CTS
+ *
+ */
+@Component
+@Service
+<span class="fc" id="L36">@Slf4j</span>
+<span class="fc" id="L37">public class ParentTaskServiceImpl implements ParentTaskService {</span>
+
+	@Autowired
+	ParentTaskRepository parentTaskRepository;
+
+	@Autowired
+	ParentTaskDetailsToParentTaskConverter parentTaskRequestConverter;
+
+	@Autowired
+	ParentTaskToParentTaskDetailsConverter parentTaskResponseConverter;
+
+	@Autowired
+	TaskRepository taskRepository;
+
+	@Override
+	public ParentTaskDetails createParentTask(ParentTaskDetails parentTaskDetailsRequest)
+			throws ParentTaskCreationException {
+		// validates parentTask description and projectId
+<span class="fc" id="L55">		validateParentTaskDetails(parentTaskDetailsRequest);</span>
+<span class="fc" id="L56">		return parentTaskResponseConverter</span>
+<span class="fc" id="L57">				.convert(parentTaskRepository.save(parentTaskRequestConverter.convert(parentTaskDetailsRequest)));</span>
+	}
+
+	@Override
+	public ParentTaskDetails updateParentTask(ParentTaskDetails parentTaskDetailsRequest)
+			throws ParentTaskCreationException, ParentTaskNotFoundException {
+<span class="fc" id="L63">		findParentTaskDetailsById(parentTaskDetailsRequest.getParentId());</span>
+		// validates parentTask description and projectId
+<span class="fc" id="L65">		validateParentTaskDetails(parentTaskDetailsRequest);</span>
+<span class="fc" id="L66">		return parentTaskResponseConverter</span>
+<span class="fc" id="L67">				.convert(parentTaskRepository.save(parentTaskRequestConverter.convert(parentTaskDetailsRequest)));</span>
+	}
+
+	@Override
+	public ParentTaskDetails findParentTaskDetailsById(int parentTaskId) throws ParentTaskNotFoundException {
+<span class="fc" id="L72">		Optional&lt;ParentTask&gt; parentTask = parentTaskRepository.findById(parentTaskId);</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">		if (!parentTask.isPresent()) {</span>
+<span class="fc" id="L74">			log.error(&quot;Parent Task with taskId &quot; + parentTaskId + &quot; not found&quot;);</span>
+<span class="fc" id="L75">			throw new ParentTaskNotFoundException(parentTaskId);</span>
+		}
+<span class="fc" id="L77">		return parentTaskResponseConverter.convert(parentTask.get());</span>
+	}
+
+	@Override
+	public List&lt;ParentTaskDetails&gt; findAllParentTaskDetails() {
+<span class="fc" id="L82">		List&lt;ParentTaskDetails&gt; parentTaskDetailList = new ArrayList&lt;ParentTaskDetails&gt;();</span>
+<span class="fc" id="L83">		Iterable&lt;ParentTask&gt; parentTaskDataList = parentTaskRepository.findAll();</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">		for (ParentTask parentTask : parentTaskDataList) {</span>
+<span class="fc" id="L85">			parentTaskDetailList.add(parentTaskResponseConverter.convert(parentTask));</span>
+<span class="fc" id="L86">		}</span>
+<span class="fc" id="L87">		return parentTaskDetailList;</span>
+	}
+
+	@Override
+	public void deleteParentTask(ParentTaskDetails parentTaskDetailsRequest) throws ParentTaskNotFoundException {
+		// find parentTask via parentTaskId
+<span class="fc" id="L93">		findParentTaskDetailsById(parentTaskDetailsRequest.getParentId());</span>
+		// delete all tasks associated with this parentTaskId
+<span class="fc" id="L95">		deleteParentTaskIdReferences(parentTaskDetailsRequest.getParentId());</span>
+		// deletes parentTask if matching parentTaskId found in DB
+<span class="fc" id="L97">		parentTaskRepository.delete(parentTaskRequestConverter.convert(parentTaskDetailsRequest));</span>
+<span class="fc" id="L98">	}</span>
+
+	@Override
+	public void deleteParentTaskByTaskId(int parentTaskId) throws ParentTaskNotFoundException {
+		// find parentTask via parentTaskId
+<span class="fc" id="L103">		findParentTaskDetailsById(parentTaskId);</span>
+		// delete all tasks associated with this parentTaskId
+<span class="fc" id="L105">		deleteParentTaskIdReferences(parentTaskId);</span>
+		// deletes parentTask if matching parentTaskId found in DB
+<span class="fc" id="L107">		parentTaskRepository.deleteById(parentTaskId);</span>
+<span class="fc" id="L108">	}</span>
+
+	/**
+	 * Validates new parent task data and throws error if there is validation error
+	 * 
+	 * @param parentTaskDetailsRequest
+	 * @throws ParentTaskCreationException
+	 */
+	private void validateParentTaskDetails(ParentTaskDetails parentTaskDetailsRequest)
+			throws ParentTaskCreationException {
+<span class="fc bfc" id="L118" title="All 2 branches covered.">		if (StringUtils.isBlank(parentTaskDetailsRequest.getParentTaskDescription())) {</span>
+<span class="fc" id="L119">			log.error(&quot;Parent Task Creation validation failed  parent task description is blank&quot;);</span>
+<span class="fc" id="L120">			throw new ParentTaskCreationException(&quot;parentTaskDescription&quot;);</span>
+		}
+<span class="fc" id="L122">	}</span>
+
+	/**
+	 * Deletes tasks with parentTaskId references from Task table
+	 * 
+	 * @param parentTaskId
+	 */
+	private void deleteParentTaskIdReferences(int parentTaskId) {
+<span class="fc bfc" id="L130" title="All 2 branches covered.">		for (Task taskData : taskRepository.findAll()) {</span>
+<span class="fc bfc" id="L131" title="All 4 branches covered.">			if ((null != taskData.getParentTask()) &amp;&amp; (taskData.getParentTask().getParentId() == parentTaskId)) {</span>
+<span class="fc" id="L132">				taskRepository.delete(taskData);</span>
+			}
+<span class="fc" id="L134">		}</span>
+<span class="fc" id="L135">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

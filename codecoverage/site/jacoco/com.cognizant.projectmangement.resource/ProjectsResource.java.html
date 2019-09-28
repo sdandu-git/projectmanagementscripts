@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>ProjectsResource.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projectmangement</a> &gt; <a href="index.source.html" class="el_package">com.cognizant.projectmangement.resource</a> &gt; <span class="el_source">ProjectsResource.java</span></div><h1>ProjectsResource.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package com.cognizant.projectmangement.resource;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.cognizant.projectmangement.exception.ProjectCreationException;
+import com.cognizant.projectmangement.exception.ProjectNotFoundException;
+import com.cognizant.projectmangement.exception.UserNotFoundException;
+import com.cognizant.projectmangement.model.ProjectDetails;
+import com.cognizant.projectmangement.service.ProjectService;
+
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Projects module controller
+ * 
+ * @author CTS
+ *
+ */
+@CrossOrigin(origins = &quot;*&quot;, allowedHeaders = &quot;*&quot;)
+@RestController
+@RequestMapping(path = &quot;/projects&quot;)
+<span class="fc" id="L38">@Slf4j</span>
+<span class="fc" id="L39">public class ProjectsResource {</span>
+
+	@Autowired
+	ProjectService projectService;
+
+	/**
+	 * Creates Project
+	 * 
+	 * @param projectDetailsRequest
+	 * @return projectDetailsResponse
+	 * @throws UserNotFoundException
+	 * @throws ProjectCreationException
+	 */
+	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity&lt;ProjectDetails&gt; createProject(@RequestBody ProjectDetails projectDetailsRequest)
+			throws UserNotFoundException, ProjectCreationException {
+<span class="fc" id="L55">		log.info(&quot;Create Project request received: &quot; + projectDetailsRequest);</span>
+<span class="fc" id="L56">		return (ResponseEntity&lt;ProjectDetails&gt;) ResponseEntity.ok(projectService.createProject(projectDetailsRequest));</span>
+	}
+
+	/**
+	 * list all projects
+	 * 
+	 * @return
+	 */
+	@GetMapping
+	public ResponseEntity&lt;List&lt;ProjectDetails&gt;&gt; findAllProjects() {
+<span class="fc" id="L66">		log.info(&quot;Find all Projects request received: &quot;);</span>
+<span class="fc" id="L67">		return ResponseEntity.ok(projectService.findAllProjects());</span>
+	}
+
+	/**
+	 * finds project details by projectId
+	 * 
+	 * @param projectId
+	 * @return projectDetails
+	 * @throws ProjectNotFoundException
+	 */
+	@GetMapping(path = &quot;/{projectId}&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity&lt;ProjectDetails&gt; findProjectByProjectId(@PathVariable Integer projectId)
+			throws ProjectNotFoundException {
+<span class="fc" id="L80">		log.info(&quot;Find by projectId &quot; + projectId + &quot; request received: &quot;);</span>
+<span class="fc" id="L81">		return ResponseEntity.ok(projectService.findProjectByProjectId(projectId));</span>
+	}
+
+	/**
+	 * Updates Project Details
+	 * 
+	 * @param projectDetailsRequest
+	 * @return projectDetailsResponse
+	 * @throws UserNotFoundException
+	 * @throws ProjectCreationException
+	 * @throws ProjectNotFoundException 
+	 */
+	@PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity&lt;ProjectDetails&gt; updateProjectDetails(@RequestBody ProjectDetails projectDetailsRequest)
+			throws UserNotFoundException, ProjectCreationException, ProjectNotFoundException {
+<span class="fc" id="L96">		log.info(&quot;Update Project request received: &quot; + projectDetailsRequest);</span>
+<span class="fc" id="L97">		return (ResponseEntity&lt;ProjectDetails&gt;) ResponseEntity.ok(projectService.updateProjectDetails(projectDetailsRequest));</span>
+	}
+
+	/**
+	 * Deletes Project
+	 * 
+	 * @param projectRequest
+	 * @return prjectId
+	 * @throws ProjectNotFoundException
+	 */
+	@DeleteMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity&lt;Integer&gt; deleteProject(@RequestBody ProjectDetails projectRequest)
+			throws ProjectNotFoundException {
+<span class="fc" id="L110">		log.info(&quot;Delete Project request received: &quot; + projectRequest);</span>
+<span class="fc" id="L111">		projectService.deleteProject(projectRequest);</span>
+<span class="fc" id="L112">		return ResponseEntity.ok(projectRequest.getProjectId());</span>
+	}
+
+	/**
+	 * Deletes Project by projectId
+	 * 
+	 * @param projectId
+	 * @return projectId
+	 * @throws ProjectNotFoundException
+	 */
+	@DeleteMapping(path = &quot;/{projectId}&quot;)
+	public ResponseEntity&lt;Integer&gt; deleteProjectByProjectId(@PathVariable Integer projectId)
+			throws ProjectNotFoundException {
+<span class="fc" id="L125">		log.info(&quot;Delete Project request received for projectId: &quot; + projectId);</span>
+<span class="fc" id="L126">		projectService.deleteProjectById(projectId);</span>
+<span class="fc" id="L127">		return ResponseEntity.ok(projectId);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

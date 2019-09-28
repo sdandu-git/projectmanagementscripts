@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Task.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projectmangement</a> &gt; <a href="index.source.html" class="el_package">com.cognizant.projectmangement.jpa.model</a> &gt; <span class="el_source">Task.java</span></div><h1>Task.java</h1><pre class="source lang-java linenums">package com.cognizant.projectmangement.jpa.model;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+
+/**
+ * The persistent class for the task database table.
+ * @author CTS
+ */
+@Entity
+@Table(name=&quot;task&quot;)
+@NamedQuery(name=&quot;Task.findAll&quot;, query=&quot;SELECT t FROM Task t&quot;)
+@Getter
+<span class="fc" id="L29">@Setter</span>
+<span class="fc" id="L30">@NoArgsConstructor</span>
+public class Task implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Column(name=&quot;task_id&quot;, unique=true, nullable=false)
+<span class="fc" id="L37">	private int taskId;</span>
+
+	@Column(name=&quot;end_date&quot;, nullable=false)
+<span class="fc" id="L40">	private LocalDate endDate;</span>
+
+	@Column(nullable=false)
+<span class="fc" id="L43">	private int priority;</span>
+
+	@Column(name=&quot;start_date&quot;, nullable=false)
+<span class="fc" id="L46">	private LocalDate startDate;</span>
+
+	@Column(nullable=false, length=200)
+<span class="fc" id="L49">	private String status;</span>
+
+	@Column(name=&quot;task_description&quot;, nullable=false, length=200)
+<span class="fc" id="L52">	private String taskDescription;</span>
+
+	//uni-directional many-to-one association to ParentTask
+	@ManyToOne
+	@JoinColumn(name=&quot;parent_id&quot;)
+<span class="fc" id="L57">	private ParentTask parentTask;</span>
+
+	//uni-directional many-to-one association to Project
+	@ManyToOne
+	@JoinColumn(name=&quot;project_id&quot;)
+<span class="fc" id="L62">	private Project project;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

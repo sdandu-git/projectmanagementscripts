@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TaskResource.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projectmangement</a> &gt; <a href="index.source.html" class="el_package">com.cognizant.projectmangement.resource</a> &gt; <span class="el_source">TaskResource.java</span></div><h1>TaskResource.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package com.cognizant.projectmangement.resource;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.cognizant.projectmangement.exception.TaskCreationException;
+import com.cognizant.projectmangement.exception.TaskNotFoundException;
+import com.cognizant.projectmangement.exception.UserNotFoundException;
+import com.cognizant.projectmangement.model.TaskDetails;
+import com.cognizant.projectmangement.service.TaskService;
+
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Tasks module controller
+ * 
+ * @author CTS
+ *
+ */
+@CrossOrigin(origins = &quot;*&quot;, allowedHeaders = &quot;*&quot;)
+@RestController
+@RequestMapping(path = &quot;/tasks&quot;)
+<span class="fc" id="L38">@Slf4j</span>
+<span class="fc" id="L39">public class TaskResource {</span>
+
+	@Autowired
+	TaskService taskService;
+
+	/**
+	 * Creates Task
+	 * 
+	 * @param taskDetailsRequest
+	 * @return taskDetailsResponse
+	 * @throws UserNotFoundException
+	 * @throws TaskCreationException
+	 */
+	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity&lt;TaskDetails&gt; createTask(@RequestBody TaskDetails taskDetailsRequest)
+			throws UserNotFoundException, TaskCreationException {
+<span class="fc" id="L55">		log.info(&quot;Create Task request received: &quot; + taskDetailsRequest);</span>
+<span class="fc" id="L56">		return (ResponseEntity&lt;TaskDetails&gt;) ResponseEntity.ok(taskService.createTask(taskDetailsRequest));</span>
+	}
+
+	/**
+	 * Lists all tasks
+	 * 
+	 * @return list of taskDetails
+	 */
+	@GetMapping
+	public ResponseEntity&lt;List&lt;TaskDetails&gt;&gt; findAllTasks() {
+<span class="fc" id="L66">		log.info(&quot;Find all tasks request received: &quot;);</span>
+<span class="fc" id="L67">		return ResponseEntity.ok(taskService.findAllTaskDetails());</span>
+	}
+
+	/**
+	 * Find task by taskId
+	 * 
+	 * @param taskId
+	 * @return taskDetails
+	 * @throws TaskNotFoundException
+	 */
+	@GetMapping(path = &quot;/{taskId}&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity&lt;TaskDetails&gt; findTaskByTaskId(@PathVariable Integer taskId) throws TaskNotFoundException {
+<span class="fc" id="L79">		log.info(&quot;Find by taskId &quot; + taskId + &quot; request received: &quot;);</span>
+<span class="fc" id="L80">		return ResponseEntity.ok(taskService.findTaskDetailsById(taskId));</span>
+	}
+
+	/**
+	 * Updates Task Details
+	 * 
+	 * @param taskDetailsRequest
+	 * @return taskDetailsResponse
+	 * @throws TaskCreationException
+	 * @throws UserNotFoundException
+	 * @throws TaskNotFoundException
+	 */
+	@PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity&lt;TaskDetails&gt; updateTaskDetails(@RequestBody TaskDetails taskDetailsRequest)
+			throws TaskCreationException, UserNotFoundException, TaskNotFoundException {
+<span class="fc" id="L95">		log.info(&quot;Update Task Details request received: &quot; + taskDetailsRequest);</span>
+<span class="fc" id="L96">		return (ResponseEntity&lt;TaskDetails&gt;) ResponseEntity.ok(taskService.updateTask(taskDetailsRequest));</span>
+	}
+
+	/**
+	 * Deletes Task
+	 * 
+	 * @param taskDetailsRequest
+	 * @return taskId
+	 * @throws TaskNotFoundException
+	 */
+	@DeleteMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity&lt;Integer&gt; deleteTask(@RequestBody TaskDetails taskDetailsRequest)
+			throws TaskNotFoundException {
+<span class="fc" id="L109">		log.info(&quot;Delete Task request received: &quot; + taskDetailsRequest);</span>
+<span class="fc" id="L110">		taskService.deleteTask(taskDetailsRequest);</span>
+<span class="fc" id="L111">		return ResponseEntity.ok(taskDetailsRequest.getTaskId());</span>
+	}
+
+	/**
+	 * Deletes Task by taskId
+	 * 
+	 * @param taskId
+	 * @return taskId
+	 * @throws TaskNotFoundException
+	 */
+	@DeleteMapping(path = &quot;/{taskId}&quot;)
+	public ResponseEntity&lt;Integer&gt; deleteTaskByTaskId(@PathVariable Integer taskId) throws TaskNotFoundException {
+<span class="fc" id="L123">		log.info(&quot;Delete Task request received for taskId: &quot; + taskId);</span>
+<span class="fc" id="L124">		taskService.deleteTaskByTaskId(taskId);</span>
+<span class="fc" id="L125">		return ResponseEntity.ok(taskId);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

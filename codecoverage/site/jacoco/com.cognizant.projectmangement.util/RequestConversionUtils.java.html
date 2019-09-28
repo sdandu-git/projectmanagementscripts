@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>RequestConversionUtils.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projectmangement</a> &gt; <a href="index.source.html" class="el_package">com.cognizant.projectmangement.util</a> &gt; <span class="el_source">RequestConversionUtils.java</span></div><h1>RequestConversionUtils.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package com.cognizant.projectmangement.util;
+
+import org.springframework.stereotype.Component;
+
+import com.cognizant.projectmangement.jpa.model.ParentTask;
+import com.cognizant.projectmangement.jpa.model.Project;
+import com.cognizant.projectmangement.jpa.model.Task;
+import com.cognizant.projectmangement.model.ParentTaskDetails;
+import com.cognizant.projectmangement.model.ProjectDetails;
+import com.cognizant.projectmangement.model.TaskDetails;
+
+/**
+ * API to MySQLDB Request Conversion Utils
+ * 
+ * @author CTS
+ *
+ */
+@Component
+<span class="fc" id="L22">public class RequestConversionUtils {</span>
+
+	/**
+	 * Returns projectData from projectDetails
+	 * 
+	 * @param projectDetails
+	 * @return projectData
+	 */
+	public Project populateProjectDataFromProjectDetails(ProjectDetails projectDetails) {
+<span class="fc" id="L31">		Project projectData = new Project();</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">		if (projectDetails.getProjectId() &gt; 0) {</span>
+<span class="fc" id="L33">			projectData.setProjectId(projectDetails.getProjectId());</span>
+		}
+<span class="fc" id="L35">		projectData.setProject(projectDetails.getProjectDescription());</span>
+<span class="fc" id="L36">		projectData.setPriority(projectDetails.getPriority());</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">		if (null != projectDetails.getStartDate()) {</span>
+<span class="fc" id="L38">			projectData.setStartDate(projectDetails.getStartDate());</span>
+		}
+<span class="fc bfc" id="L40" title="All 2 branches covered.">		if (null != projectDetails.getEndDate()) {</span>
+<span class="fc" id="L41">			projectData.setEndDate(projectDetails.getEndDate());</span>
+		}
+<span class="fc" id="L43">		return projectData;</span>
+	}
+
+	/**
+	 * Populates taskData from taskDetails
+	 * 
+	 * @param taskDetails
+	 * @param projectDetailsCheck
+	 * @param parentTaskDetailsCheck
+	 * @return taskData
+	 */
+	public Task populateTaskDataFromTaskDetails(TaskDetails taskDetails, boolean projectDetailsCheck,
+			boolean parentTaskDetailsCheck) {
+<span class="fc" id="L56">		Task taskData = new Task();</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">		if (taskDetails.getTaskId() &gt; 0) {</span>
+<span class="fc" id="L58">			taskData.setTaskId(taskDetails.getTaskId());</span>
+		}
+<span class="fc" id="L60">		taskData.setTaskDescription(taskDetails.getTaskDescription());</span>
+<span class="fc" id="L61">		taskData.setStatus(taskDetails.getTaskStatus());</span>
+<span class="fc" id="L62">		taskData.setPriority(taskDetails.getPriority());</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">		if (null != taskDetails.getStartDate()) {</span>
+<span class="fc" id="L64">			taskData.setStartDate(taskDetails.getStartDate());</span>
+		}
+<span class="fc bfc" id="L66" title="All 2 branches covered.">		if (null != taskDetails.getEndDate()) {</span>
+<span class="fc" id="L67">			taskData.setEndDate(taskDetails.getEndDate());</span>
+		}
+<span class="fc bfc" id="L69" title="All 4 branches covered.">		if ((null != taskDetails.getParentTaskDetails()) &amp;&amp; parentTaskDetailsCheck) {</span>
+<span class="fc" id="L70">			taskData.setParentTask(</span>
+<span class="fc" id="L71">					populateParentTaskDataFromParentTaskDetails(taskDetails.getParentTaskDetails(), false));</span>
+		}
+
+<span class="fc bfc" id="L74" title="All 4 branches covered.">		if ((null != taskDetails.getProjectDetails()) &amp;&amp; projectDetailsCheck) {</span>
+<span class="fc" id="L75">			taskData.setProject(populateProjectDataFromProjectDetails(taskDetails.getProjectDetails()));</span>
+		}
+
+<span class="fc" id="L78">		return taskData;</span>
+	}
+
+	/**
+	 * Returns parentTask from parentTaskDetails
+	 * 
+	 * @param parentTaskDetails
+	 * @param projectDetailsCheck
+	 * @return projectTaskData
+	 */
+	public ParentTask populateParentTaskDataFromParentTaskDetails(ParentTaskDetails parentTaskDetails,
+			boolean projectDetailsCheck) {
+<span class="fc" id="L90">		ParentTask parentTask = new ParentTask();</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">		if (parentTaskDetails.getParentId() &gt; 0) {</span>
+<span class="fc" id="L92">			parentTask.setParentId(parentTaskDetails.getParentId());</span>
+		}
+<span class="fc" id="L94">		parentTask.setParentTask(parentTaskDetails.getParentTaskDescription());</span>
+<span class="fc bfc" id="L95" title="All 4 branches covered.">		if ((null != parentTaskDetails.getProjectDetails()) &amp;&amp; projectDetailsCheck) {</span>
+<span class="fc" id="L96">			parentTask.setProject(populateProjectDataFromProjectDetails(parentTaskDetails.getProjectDetails()));</span>
+		}
+<span class="fc" id="L98">		return parentTask;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

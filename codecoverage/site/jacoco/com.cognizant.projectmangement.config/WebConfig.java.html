@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>WebConfig.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projectmangement</a> &gt; <a href="index.source.html" class="el_package">com.cognizant.projectmangement.config</a> &gt; <span class="el_source">WebConfig.java</span></div><h1>WebConfig.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package com.cognizant.projectmangement.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.cognizant.projectmangement.request.converter.ParentTaskDetailsToParentTaskConverter;
+import com.cognizant.projectmangement.request.converter.ProjectDetailsToProjectConverter;
+import com.cognizant.projectmangement.request.converter.TaskDetailsToTaskConverter;
+import com.cognizant.projectmangement.request.converter.UserDetailsToUserConverter;
+import com.cognizant.projectmangement.response.converter.ParentTaskToParentTaskDetailsConverter;
+import com.cognizant.projectmangement.response.converter.ProjectToProjectDetailsConverter;
+import com.cognizant.projectmangement.response.converter.TaskToTaskDetailsConverter;
+import com.cognizant.projectmangement.response.converter.UserToUserDetailsConverter;
+
+/**
+ * Registration of Spring Converter services
+ * 
+ * @author CTS
+ *
+ */
+@Configuration
+<span class="nc" id="L26">public class WebConfig implements WebMvcConfigurer {</span>
+
+	@Override
+	public void addFormatters(FormatterRegistry registry) { 
+		
+		// Request Converters
+<span class="nc" id="L32">		registry.addConverter(new UserDetailsToUserConverter());</span>
+<span class="nc" id="L33">		registry.addConverter(new ProjectDetailsToProjectConverter());</span>
+<span class="nc" id="L34">		registry.addConverter(new TaskDetailsToTaskConverter());</span>
+<span class="nc" id="L35">		registry.addConverter(new ParentTaskDetailsToParentTaskConverter());</span>
+		
+		// Response Converters
+<span class="nc" id="L38">		registry.addConverter(new UserToUserDetailsConverter());</span>
+<span class="nc" id="L39">		registry.addConverter(new ProjectToProjectDetailsConverter());</span>
+<span class="nc" id="L40">		registry.addConverter(new TaskToTaskDetailsConverter());</span>
+<span class="nc" id="L41">		registry.addConverter(new ParentTaskToParentTaskDetailsConverter());</span>
+<span class="nc" id="L42">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
