@@ -1,0 +1,62 @@
+{
+  "projects" : {
+    "transaction" : "projects",
+    "sampleCount" : 10,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 4286.099999999999,
+    "minResTime" : 3311.0,
+    "maxResTime" : 5863.0,
+    "pct1ResTime" : 5796.6,
+    "pct2ResTime" : 5863.0,
+    "pct3ResTime" : 5863.0,
+    "throughput" : 1.3082155939298796,
+    "receivedKBytesPerSec" : 2.6266516221873366,
+    "sentKBytesPerSec" : 0.18013515502354788
+  },
+  "Total" : {
+    "transaction" : "Total",
+    "sampleCount" : 30,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 3679.666666666666,
+    "minResTime" : 2222.0,
+    "maxResTime" : 5863.0,
+    "pct1ResTime" : 5041.300000000001,
+    "pct2ResTime" : 5497.799999999999,
+    "pct3ResTime" : 5863.0,
+    "throughput" : 2.2099447513812156,
+    "receivedKBytesPerSec" : 4.272415976058932,
+    "sentKBytesPerSec" : 0.3042990331491713
+  },
+  "users" : {
+    "transaction" : "users",
+    "sampleCount" : 10,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 2619.8,
+    "minResTime" : 2222.0,
+    "maxResTime" : 3013.0,
+    "pct1ResTime" : 3008.7,
+    "pct2ResTime" : 3013.0,
+    "pct3ResTime" : 3013.0,
+    "throughput" : 2.2177866489243736,
+    "receivedKBytesPerSec" : 3.9569298902195604,
+    "sentKBytesPerSec" : 0.3053788256819694
+  },
+  "tasks" : {
+    "transaction" : "tasks",
+    "sampleCount" : 10,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 4133.1,
+    "minResTime" : 2661.0,
+    "maxResTime" : 5072.0,
+    "pct1ResTime" : 5038.5,
+    "pct2ResTime" : 5072.0,
+    "pct3ResTime" : 5072.0,
+    "throughput" : 1.5092061575611229,
+    "receivedKBytesPerSec" : 3.030202988228192,
+    "sentKBytesPerSec" : 0.20781061349230304
+  }
+}
